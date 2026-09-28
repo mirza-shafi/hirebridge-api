@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 60 | 33 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 67 | 26 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 8 | 1 | 7 |
-| **Total** | **208** | **105** | **103** |
+| **Total** | **208** | **112** | **96** |
 
-**Current position: Phase 0 44/2 · Phase 1 60/33. The API boots and 23 endpoints are wired to the workers. Remaining Phase 1 work is the PDF renderer, email, and the web screens.**
+**Current position: Phase 0 44/2 · Phase 1 67/26. The candidate flow runs end to end — upload, parse, tailor, validate, diff, approve, PDF. Remaining: email, the onboarding and job-creation screens, then the Phase 1 exit gate.**
 
 ---
 
@@ -158,8 +158,8 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] `TailoredResume` schema with per-line `source_fact_ids`
 - [x] Prompt v1 + agent implementation
 - [x] Diff computation: base vs tailored, line-level with status
-- [ ] `POST /v1/resume-versions/{id}/approve`
-- [ ] Enforce approval before a version can attach to an application
+- [x] `POST /v1/resume-versions/{id}/approve`
+- [x] Enforce approval before a version can attach to an application
 
 ### Fabrication Validator (release gate)
 - [x] Structural check: every output line cites ≥ 1 `fact_id`
@@ -175,11 +175,11 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] **30-case adversarial fixture set — must block 100%**
 
 ### PDF rendering
-- [ ] HTML → PDF renderer
-- [ ] Template 1 (modern)
-- [ ] Template 2 (classic)
-- [ ] ATS-safe output: selectable text, no tables carrying content
-- [ ] Store as a file + serve via signed URL
+- [x] HTML → PDF renderer
+- [x] Template 1 (modern)
+- [x] Template 2 (classic)
+- [x] ATS-safe output: selectable text, no tables carrying content
+- [x] Store as a file + serve via signed URL
 
 ### Ranking
 - [x] `applications` table with `profile_snapshot`

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ model.full_name }} — CV</title>
+    <style>
+      {{ base_css }}
+      .name { font-size: 22pt; }
+      h2 { color: #1a1a1a; border-bottom-width: 0.8pt; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1 class="name">{{ model.full_name }}</h1>
+      {% if model.headline %}<p class="headline">{{ model.headline }}</p>{% endif %}
+      {% if model.contact %}
+        <p class="contact">{% for item in model.contact %}<span>{{ item }}</span>{% if not loop.last %}<span class="sep"> · </span>{% endif %}{% endfor %}</p>
+      {% endif %}
+    </header>
+
+    {% for section in model.sections %}
+      <section>
+        <h2>{{ section.title }}</h2>
+        {% if section.key == "summary" %}
+          {% for line in section.lines %}<p class="line">{{ line }}</p>{% endfor %}
+        {% else %}
+          <ul>{% for line in section.lines %}<li>{{ line }}</li>{% endfor %}</ul>
+        {% endif %}
+      </section>
+    {% endfor %}
+  </body>
+</html>

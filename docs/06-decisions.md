@@ -88,3 +88,23 @@ and the runner's retry policy behaves identically either way. Pricing lives in
 on the same eval suite possible. Cost: two adapters to maintain, and `strictify()` exists
 solely to reshape Pydantic schemas for OpenAI's strict mode. An unpriced model reports $0
 with a warning rather than a guess, so the gap is visible in the cost dashboard.
+
+---
+
+## ADR-0008 — HTML + CSS for CV rendering, not a drawing API
+**Date:** 2026-09-29 · **Status:** Accepted
+
+**Context.** Tailored CVs need rendering to PDF, in more than one template, iterated on by
+eye. ReportLab is pip-only and needs no system libraries; WeasyPrint renders HTML/CSS but
+pulls in pango and harfbuzz.
+
+**Decision.** WeasyPrint with Jinja2 templates. Layout decisions live in a pure
+`layout.py`, so section ordering and grouping stay testable without the toolchain.
+
+**Consequences.** Templates are iterated in CSS, which is the right medium for visual work.
+Cost: system packages in the Dockerfile and in CI. Every render is checked for machine
+readability by extracting the text back out — that check immediately caught a CSS
+`::before` separator that was invisible to extraction and merged the candidate's contact
+fields into one unparseable token. A rendering failure is logged and leaves `pdf_file_id`
+null rather than failing the run: the candidate keeps their verified CV and diff, and the
+PDF can be regenerated.

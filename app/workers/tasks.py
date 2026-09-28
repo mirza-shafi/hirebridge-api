@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
 import uuid
 from typing import Any
 
@@ -38,9 +39,10 @@ from app.schemas.resume import TailoredResume
 from app.services import runs as run_service
 from app.services.embedding_text import job_embedding_text, profile_embedding_text
 from app.services.extraction import extract
+from app.services.pdf.render import render_pdf
 from app.services.resume_diff import compute_diff
 from app.services.scoring_payload import build_scoring_payload
-from app.services.storage import get_storage
+from app.services.storage import get_storage, storage_key
 from app.workers.base import task_run
 
 
@@ -197,12 +199,24 @@ async def tailor_cv(
         session.add(version)
         await session.flush()
 
+        # Rendered here, in the worker, because validation has passed by this point and a
+        # failed validation never reaches this line. Approval gates the *download*, not the
+        # render — so "Approve and download" is instant rather than starting a second job.
+        await run_service.mark_progress(session, run, step="rendering", pct=92)
+        pdf_file_id = await _render_and_store(
+            session, resume=resume, version=version, tailored=tailored,
+            full_name=await _display_name(session, resume.user_id),
+        )
+        version.pdf_file_id = pdf_file_id
+        await session.flush()
+
         await run_service.mark_succeeded(
             session, run,
             output_ref={
                 "resume_version_id": str(version.id),
                 "validator_status": run.validator_status,
                 "diff": diff.summary.as_dict() if diff else None,
+                "pdf_ready": pdf_file_id is not None,
             },
         )
         return {"ok": True, "resume_version_id": str(version.id)}
@@ -275,6 +289,52 @@ async def rank_job(ctx: dict[str, Any], run_id: str, job_id: str) -> dict[str, A
 
 
 # --- helpers ----------------------------------------------------------------
+
+
+async def _display_name(session: Any, user_id: uuid.UUID) -> str:
+    from app.models import User
+
+    user = await session.get(User, user_id)
+    return (user.full_name if user and user.full_name else "") or "Candidate"
+
+
+async def _render_and_store(
+    session: Any,
+    *,
+    resume: Resume,
+    version: ResumeVersion,
+    tailored: TailoredResume,
+    full_name: str,
+) -> uuid.UUID | None:
+    """Render the CV and store it.
+
+    A rendering failure must not fail the whole run: the candidate still has a verified
+    tailored CV and a diff to read, and the PDF can be regenerated. Losing the tailoring
+    work over a font problem would be the worse outcome.
+    """
+    try:
+        rendered = render_pdf(tailored, full_name=full_name, template=version.template)
+    except Exception:
+        logging.getLogger("hirebridge.worker").exception(
+            "PDF rendering failed for version %s", version.id
+        )
+        return None
+
+    key = storage_key(user_id=str(resume.user_id), kind="generated_pdf", filename="cv.pdf")
+    await get_storage().put(key, rendered.content, content_type="application/pdf")
+
+    stored = StoredFile(
+        owner_user_id=resume.user_id,
+        kind="generated_pdf",
+        storage_key=key,
+        mime="application/pdf",
+        size_bytes=len(rendered.content),
+        checksum_sha256=hashlib.sha256(rendered.content).hexdigest(),
+        av_scan_status="clean",  # we generated it
+    )
+    session.add(stored)
+    await session.flush()
+    return stored.id
 
 
 async def _profile_for(session: Any, user_id: uuid.UUID) -> CandidateProfile:

@@ -1,0 +1,65 @@
+/* ATS-safe by construction.
+
+   No multi-column layout, no tables, no text inside images, no exotic fonts. Section
+   headings are real headings in reading order, which is how a parser finds them. */
+
+@page {
+  size: A4;
+  margin: 16mm 16mm 14mm 16mm;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: "DejaVu Sans", "Helvetica", "Arial", sans-serif;
+  font-size: 10pt;
+  line-height: 1.45;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.name {
+  font-size: 20pt;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.headline {
+  font-size: 11pt;
+  color: #444;
+  margin: 2pt 0 0 0;
+}
+
+.contact {
+  font-size: 9pt;
+  color: #555;
+  margin: 6pt 0 0 0;
+}
+
+/* The separator is real text in the markup, not a ::before pseudo-element.
+   Generated content is invisible to PDF text extraction, so a CSS separator makes an ATS
+   read "Dhaka, Bangladeshgithub.com/..." as one token and lose the fields. */
+.contact .sep { color: #999; }
+
+section { margin-top: 14pt; }
+
+h2 {
+  font-size: 10pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 5pt 0;
+  padding-bottom: 3pt;
+  border-bottom: 0.6pt solid #d4d4d4;
+}
+
+ul { margin: 0; padding-left: 12pt; }
+
+li {
+  margin: 0 0 3pt 0;
+  /* Never split a bullet across a page: half a claim reads as a different claim. */
+  page-break-inside: avoid;
+}
+
+p.line { margin: 0 0 3pt 0; }
