@@ -36,3 +36,8 @@ jobs:
       - run: uv run mypy app
       - run: uv run alembic upgrade head
       - run: uv run pytest
+      - name: OpenAPI schema is current
+        run: |
+          uv run python scripts/export_openapi.py openapi.json
+          git diff --exit-code openapi.json \
+            || { echo '::error::openapi.json is stale — run `make openapi` and commit it'; exit 1; }

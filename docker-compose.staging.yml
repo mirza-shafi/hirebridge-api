@@ -1,0 +1,82 @@
+# Staging / production on the VPS. Postgres and Redis are not exposed to the host network.
+#
+#   docker compose -f docker-compose.staging.yml --env-file .env up -d
+#
+# The worker deploys independently of the api and drains in-flight jobs on SIGTERM.
+
+services:
+  api:
+    image: ${IMAGE:-ghcr.io/mirza-shafi/hirebridge-api:latest}
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      RUN_MIGRATIONS: "true"
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  worker-parse:
+    image: ${IMAGE:-ghcr.io/mirza-shafi/hirebridge-api:latest}
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      RUN_MIGRATIONS: "false"
+      QUEUE_NAME: hb:parse
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+    depends_on: [api]
+    stop_grace_period: 120s
+
+  worker-generate:
+    image: ${IMAGE:-ghcr.io/mirza-shafi/hirebridge-api:latest}
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      RUN_MIGRATIONS: "false"
+      QUEUE_NAME: hb:generate
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+    depends_on: [api]
+    stop_grace_period: 120s
+
+  worker-interview:
+    image: ${IMAGE:-ghcr.io/mirza-shafi/hirebridge-api:latest}
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      RUN_MIGRATIONS: "false"
+      QUEUE_NAME: hb:interview
+    command: ["arq", "app.workers.settings.WorkerSettings"]
+    depends_on: [api]
+    stop_grace_period: 120s
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hirebridge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-hirebridge}
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hirebridge}"]
+      interval: 10s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes: ["redisdata:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 10
+
+volumes:
+  pgdata:
+  redisdata:

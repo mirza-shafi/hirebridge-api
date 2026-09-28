@@ -82,6 +82,17 @@ class FakeLLMClient:
         )
 
 
+# USD per 1M tokens, (input, output). Fill in when the provider is chosen —
+# an unlisted model costs 0, which makes the gap visible in the cost dashboard
+# rather than silently under-reporting.
+PRICING: dict[str, tuple[float, float]] = {}
+
+
+def price_usd(model: str, input_tokens: int, output_tokens: int) -> float:
+    rate_in, rate_out = PRICING.get(model, (0.0, 0.0))
+    return (input_tokens * rate_in + output_tokens * rate_out) / 1_000_000
+
+
 def get_llm_client() -> LLMClient:
     if settings.llm_provider == "fake":
         return FakeLLMClient()

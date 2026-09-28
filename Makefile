@@ -1,4 +1,4 @@
-.PHONY: install up down dev worker migrate revision lint fmt type test check
+.PHONY: install up down dev worker migrate revision lint fmt type test check openapi
 
 install:   ; uv sync
 up:        ; docker compose up -d
@@ -11,4 +11,6 @@ lint:      ; uv run ruff check .
 fmt:       ; uv run ruff format . && uv run ruff check --fix .
 type:      ; uv run mypy app
 test:      ; uv run pytest
+openapi:   ; uv run python scripts/export_openapi.py openapi.json
+
 check: lint type test

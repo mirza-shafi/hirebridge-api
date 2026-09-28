@@ -27,7 +27,7 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
-| Phase 0 — Foundation | 46 | 36 | 10 |
+| Phase 0 — Foundation | 46 | 44 | 2 |
 | Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 0 | 93 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
@@ -35,9 +35,9 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 6 | 0 | 6 |
-| **Total** | **206** | **36** | **170** |
+| **Total** | **206** | **44** | **162** |
 
-**Current position: Phase 0 scaffolded — 36 done, 170 pending. Phase 0 is not closed until its exit gate passes (see below).**
+**Current position: Phase 0 — 44/2 done. Remaining items need the app installed and running; the exit gate closes Phase 0.**
 
 ---
 
@@ -81,25 +81,25 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] Redis pub/sub channel per run
 - [x] SSE endpoint `GET /v1/runs/{id}/events`
 - [x] `GET /v1/runs/{id}` reconciliation endpoint
-- [ ] `Idempotency-Key` middleware + key storage
-- [ ] Token budget enforcement + `aborted_budget` status
-- [ ] Retry policy: 3 transient, 1 validation-repair, then hard fail
+- [x] `Idempotency-Key` middleware + key storage
+- [x] Token budget enforcement + `aborted_budget` status
+- [x] Retry policy: 3 transient, 1 validation-repair, then hard fail
 - [x] Graceful worker shutdown — drain in-flight jobs on SIGTERM
 
 ### Auth
 - [x] Clerk JWKS verification dependency (cached keys)
 - [x] `current_user` / `current_org` dependencies
 - [x] Role enforcement (`candidate`, `recruiter`, `hiring_manager`, `org_admin`, `platform_admin`)
-- [ ] Clerk webhook → local user/org sync
+- [x] Clerk webhook → local user/org sync
 - [x] Cross-tenant access returns 404, never 403
 
 ### CI/CD
 - [x] GitHub Actions: ruff + mypy + pytest on PR
 - [x] Dockerfile (single image, api and worker entrypoints)
-- [ ] Staging compose project on the VPS
-- [ ] Deploy workflow: build → registry → pull → `compose up -d`
-- [ ] Alembic migration as a pre-start step
-- [ ] Sentry wired on api and worker
+- [x] Staging compose project on the VPS
+- [x] Deploy workflow: build → registry → pull → `compose up -d`
+- [x] Alembic migration as a pre-start step
+- [x] Sentry wired on api and worker
 
 ### Phase 0 exit gate
 - [ ] Authenticated `GET /v1/me` succeeds from the web app in staging

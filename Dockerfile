@@ -9,6 +9,9 @@ RUN uv sync --frozen --no-dev --no-install-project 2>/dev/null || uv sync --no-d
 COPY . .
 ENV PATH="/srv/.venv/bin:$PATH"
 
+RUN chmod +x scripts/entrypoint.sh
+
 # api:    docker run <img>
-# worker: docker run <img> arq app.workers.settings.WorkerSettings
+# worker: docker run -e RUN_MIGRATIONS=false <img> arq app.workers.settings.WorkerSettings
+ENTRYPOINT ["./scripts/entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

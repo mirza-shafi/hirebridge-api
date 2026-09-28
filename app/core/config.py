@@ -42,6 +42,9 @@ class Settings(BaseSettings):
     storage_access_key: str | None = None
     storage_secret_key: str | None = None
 
+    # Observability
+    sentry_dsn: str | None = None
+
     # Budgets
     default_org_monthly_token_budget: int = 5_000_000
 
