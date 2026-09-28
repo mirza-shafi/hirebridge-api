@@ -46,7 +46,7 @@ class Conflict(AppError):
 
 
 class Unprocessable(AppError):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = 422
     error_type = "validation-failed"
     title = "Validation failed"
 
@@ -97,7 +97,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             for e in exc.errors()
         ]
         return problem(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             error_type="validation-failed",
             title="Validation failed",
             detail="The request body failed validation.",

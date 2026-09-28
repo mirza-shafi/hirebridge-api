@@ -187,10 +187,13 @@ class AgentRunner:
         raise AssertionError("unreachable")  # pragma: no cover
 
     async def _record_usage(self, run: AgentRun, completion: Completion) -> None:
-        run.input_tokens += completion.input_tokens
-        run.output_tokens += completion.output_tokens
+        # Column defaults are applied on flush, not on construction, so a run that has not
+        # been flushed yet has None in these fields. Accumulating defensively keeps the
+        # runner correct regardless of when the caller flushed.
+        run.input_tokens = (run.input_tokens or 0) + completion.input_tokens
+        run.output_tokens = (run.output_tokens or 0) + completion.output_tokens
         run.provider = completion.model.split(":", 1)[0]
-        run.cost_usd = float(run.cost_usd) + price_usd(
+        run.cost_usd = float(run.cost_usd or 0) + price_usd(
             self.config.model, completion.input_tokens, completion.output_tokens
         )
         await budget_service.record_org_usage(self.session, run.org_id, completion.total_tokens)

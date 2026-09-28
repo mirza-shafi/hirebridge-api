@@ -12,7 +12,7 @@ from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
 from app.core.observability import init_observability
-from app.db.session import engine
+from app.db.session import dispose_engine
 
 
 @asynccontextmanager
@@ -20,7 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging(settings.log_level)
     init_observability()
     yield
-    await engine.dispose()
+    await dispose_engine()
 
 
 app = FastAPI(

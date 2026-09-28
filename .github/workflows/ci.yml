@@ -37,6 +37,8 @@ jobs:
       - run: uv run alembic upgrade head
       - name: Release gates (fabrication validator + scoring allowlist)
         run: uv run pytest tests/agents -q
+      - name: App boots and the contract honours the product rules
+        run: uv run python scripts/bootcheck.py
       - run: uv run pytest
       - name: OpenAPI schema is current
         run: |

@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 46 | 47 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 60 | 33 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 8 | 1 | 7 |
-| **Total** | **208** | **91** | **117** |
+| **Total** | **208** | **105** | **103** |
 
-**Current position: Phase 0 44/2 · Phase 1 46/47. Both sides of the pipeline are built and unit-tested. Next: the API routes and workers that wire them together, then the web screens.**
+**Current position: Phase 0 44/2 · Phase 1 60/33. The API boots and 23 endpoints are wired to the workers. Remaining Phase 1 work is the PDF renderer, email, and the web screens.**
 
 ---
 
@@ -109,10 +109,10 @@ Nothing user-facing. Everything below assumes this layer exists.
 
 ### Files & storage
 - [x] `files` table
-- [ ] S3/R2 client
-- [ ] `POST /v1/files/upload-url` — signed, direct-to-storage
-- [ ] Magic-byte type validation + 10 MB cap
-- [ ] SHA-256 checksum (doubles as the parse cache key)
+- [x] S3/R2 client
+- [x] `POST /v1/files/upload-url` — signed, direct-to-storage
+- [x] Magic-byte type validation + 10 MB cap
+- [x] SHA-256 checksum (doubles as the parse cache key)
 - [ ] AV scan hook + `av_scan_status` gate
 - [ ] Signed download URLs, short TTL
 
@@ -185,28 +185,28 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] `applications` table with `profile_snapshot`
 - [x] `application_scores` table, versioned not overwritten
 - [x] `application_events` audit table
-- [ ] Lexical score: `ts_rank` against must/nice terms
+- [x] Lexical score: `ts_rank` against must/nice terms
 - [x] Semantic score: cosine against the job embedding
 - [x] Rules score: years, seniority band, location, work authorization
 - [x] Composite with per-job weights stored on the score row
 - [x] Protected-attribute allowlist payload builder
 - [x] **Allowlist unit test — release gate**
 - [x] Ranking Justification Agent, top 25 lazy generation
-- [ ] `POST /v1/applications/{id}/justify` for on-demand justification
+- [x] `POST /v1/applications/{id}/justify` for on-demand justification
 - [x] Evidence citations linking each matched requirement to a `fact_id`
-- [ ] Progressive rank run emitting SSE progress ("ranked 240 of 412")
+- [x] Progressive rank run emitting SSE progress ("ranked 240 of 412")
 - [ ] Rank failure falls back to recency order with an explicit flag
 
 ### Endpoints
 - [ ] Candidate profile + facts CRUD + verify
 - [ ] Profile completeness endpoint
-- [ ] Resumes, versions, tailor, diff, approve, pdf
-- [ ] Applications: create, list, withdraw
-- [ ] Tailor accepts a raw JD string (works with jobs not on HireBridge)
-- [ ] Jobs: create, parse, edit, publish, pause, close
-- [ ] Publish blocked while red flags are unresolved
-- [ ] Applicants list — **no score-threshold parameter, by design**
-- [ ] Stage change, notes, events
+- [x] Resumes, versions, tailor, diff, approve, pdf
+- [x] Applications: create, list, withdraw
+- [x] Tailor accepts a raw JD string (works with jobs not on HireBridge)
+- [x] Jobs: create, parse, edit, publish, pause, close
+- [x] Publish blocked while red flags are unresolved
+- [x] Applicants list — **no score-threshold parameter, by design**
+- [x] Stage change, notes, events
 - [ ] Compare endpoint (2–4 candidates)
 - [ ] Public job endpoints + cache headers
 - [ ] Org usage endpoint

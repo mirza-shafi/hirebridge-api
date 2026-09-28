@@ -5,7 +5,7 @@ from typing import Any
 from fastapi import APIRouter, Response, status
 from sqlalchemy import text
 
-from app.db.session import engine
+from app.db.session import get_engine
 from app.services.runs import redis_client
 
 router = APIRouter(tags=["system"])
@@ -21,7 +21,7 @@ async def readyz(response: Response) -> dict[str, Any]:
     checks: dict[str, str] = {}
 
     try:
-        async with engine.connect() as conn:
+        async with get_engine().connect() as conn:
             await conn.execute(text("SELECT 1"))
         checks["database"] = "ok"
     except Exception as exc:  # noqa: BLE001

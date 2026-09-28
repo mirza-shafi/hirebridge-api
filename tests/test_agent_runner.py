@@ -42,7 +42,24 @@ def _no_redis(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def _run() -> AgentRun:
-    return AgentRun(agent="test_agent", status=RunStatus.QUEUED.value, cost_usd=0)
+    """Deliberately unflushed, with no explicit numeric defaults.
+
+    Column defaults land on flush, so an unflushed run carries None in its counters — which
+    is exactly the state the runner sees when a caller enqueues before committing.
+    """
+    return AgentRun(agent="test_agent", status=RunStatus.QUEUED.value)
+
+
+async def test_counters_accumulate_from_an_unflushed_run(fake_llm: FakeLLMClient) -> None:
+    fake_llm.queue({"text": "ok"})
+    run = _run()
+    assert run.input_tokens is None, "precondition: defaults have not been applied yet"
+
+    await AgentRunner(_Session(), fake_llm, CONFIG).run(  # type: ignore[arg-type]
+        run=run, prompt="hello", schema=Draft
+    )
+    assert run.input_tokens == 20
+    assert float(run.cost_usd) == 0.0
 
 
 async def test_records_tokens_on_the_run(fake_llm: FakeLLMClient) -> None:
