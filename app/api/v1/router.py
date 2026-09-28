@@ -6,6 +6,8 @@ from app.api.v1.routes import (
     health,
     jobs,
     me,
+    profile,
+    public,
     resume_versions,
     resumes,
     runs,
@@ -14,12 +16,14 @@ from app.api.v1.routes import (
 
 api_router = APIRouter()
 api_router.include_router(me.router)
+api_router.include_router(profile.router)
 api_router.include_router(runs.router)
 api_router.include_router(files.router)
 api_router.include_router(resumes.router)
 api_router.include_router(resume_versions.router)
 api_router.include_router(jobs.router)
 api_router.include_router(applications.router)
+api_router.include_router(public.router)
 api_router.include_router(webhooks.router)
 
 system_router = APIRouter()

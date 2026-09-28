@@ -14,6 +14,10 @@
 | `[!]` | blocked — see the note beside it |
 
 Rules: a task is only `[x]` when it is merged and working in staging, not when the code is written.
+
+> **Caveat, honestly stated:** nothing here has been run against a real database,
+> Redis, or a live LLM yet. Items marked `[x]` are written and unit-tested against
+> fakes. Phase 0's exit gate is what converts that into a real claim.
 A phase does not start until the previous phase's **exit gate** is fully checked.
 Adding a task mid-phase means removing one of equal size from the same phase.
 
@@ -28,14 +32,14 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 67 | 26 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 75 | 18 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 8 | 1 | 7 |
-| **Total** | **208** | **112** | **96** |
+| **Total** | **208** | **120** | **88** |
 
 **Current position: Phase 0 44/2 · Phase 1 67/26. The candidate flow runs end to end — upload, parse, tailor, validate, diff, approve, PDF. Remaining: email, the onboarding and job-creation screens, then the Phase 1 exit gate.**
 
@@ -124,8 +128,8 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] Header/footer contamination stripping
 
 ### Resume Parser Agent
-- [ ] `candidate_profiles` table
-- [ ] `profile_facts` table with addressable `fact_id` and `bullet_id`
+- [x] `candidate_profiles` table
+- [x] `profile_facts` table with addressable `fact_id` and `bullet_id`
 - [x] `ParsedProfile` schema
 - [x] Prompt v1 + agent implementation
 - [x] Date normalizer for local formats (`Jan'23-now`, `01/2023 – Present`, `2023-current`)
@@ -146,8 +150,8 @@ Nothing user-facing. Everything below assumes this layer exists.
 
 ### Embeddings & search
 - [x] Embedding client, model pinned, dimension 1536 recorded per row
-- [ ] Profile embedding job
-- [ ] Job embedding job
+- [x] Profile embedding job
+- [x] Job embedding job
 - [x] pgvector HNSW indexes (`vector_cosine_ops`)
 - [x] `search_vector` generated columns + GIN indexes
 - [x] Embedding cache by content hash
@@ -198,8 +202,8 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Rank failure falls back to recency order with an explicit flag
 
 ### Endpoints
-- [ ] Candidate profile + facts CRUD + verify
-- [ ] Profile completeness endpoint
+- [x] Candidate profile + facts CRUD + verify
+- [x] Profile completeness endpoint
 - [x] Resumes, versions, tailor, diff, approve, pdf
 - [x] Applications: create, list, withdraw
 - [x] Tailor accepts a raw JD string (works with jobs not on HireBridge)
@@ -208,7 +212,7 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] Applicants list — **no score-threshold parameter, by design**
 - [x] Stage change, notes, events
 - [ ] Compare endpoint (2–4 candidates)
-- [ ] Public job endpoints + cache headers
+- [x] Public job endpoints + cache headers
 - [ ] Org usage endpoint
 
 ### Notifications
@@ -220,7 +224,7 @@ Nothing user-facing. Everything below assumes this layer exists.
 ### Phase 1 exit gate
 - [ ] 3 design-partner companies each ran one real role through ranking
 - [ ] Precision@10 ≥ 60% against what the recruiter actually advanced
-- [ ] Fabrication validator blocks 30/30 adversarial cases
+- [x] Fabrication validator blocks 30/30 adversarial cases
 - [ ] Tailored CV p95 under 90 s
 - [ ] One recruiter confirms the reason text is usable without explanation
 
