@@ -35,6 +35,8 @@ jobs:
       - run: uv run ruff check .
       - run: uv run mypy app
       - run: uv run alembic upgrade head
+      - name: Release gates (fabrication validator + scoring allowlist)
+        run: uv run pytest tests/agents -q
       - run: uv run pytest
       - name: OpenAPI schema is current
         run: |

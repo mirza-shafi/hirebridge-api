@@ -22,6 +22,7 @@ from typing import Any, Protocol, TypeVar
 from pydantic import BaseModel, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.errors import AgentFailed, TransientProviderError, ValidationFailure
 from app.agents.llm import Completion, LLMClient, price_usd
 from app.core.logging import run_id_var
 from app.models import AgentRun, RunStatus
@@ -32,32 +33,21 @@ log = logging.getLogger("hirebridge.agent")
 
 SchemaT = TypeVar("SchemaT", bound=BaseModel)
 
+__all__ = [
+    "AgentConfig",
+    "AgentFailed",
+    "AgentRunner",
+    "TransientProviderError",
+    "ValidationFailure",
+    "Validator",
+]
+
 REPAIR_PREAMBLE = (
     "Your previous response was rejected by the output validator.\n"
     "Complaint: {complaint}\n"
     "Produce a corrected response. Do not introduce any information that is not present "
     "in the source material.\n\n"
 )
-
-
-class TransientProviderError(Exception):
-    """Provider-side failure worth retrying (timeout, 5xx, rate limit)."""
-
-
-class ValidationFailure(Exception):
-    """Output was well-formed but broke a product rule. Carries the complaint for repair."""
-
-    def __init__(self, complaint: str, *, status: str = "failed") -> None:
-        super().__init__(complaint)
-        self.complaint = complaint
-        self.status = status
-
-
-class AgentFailed(Exception):
-    def __init__(self, code: str, message: str) -> None:
-        super().__init__(message)
-        self.code = code
-        self.message = message
 
 
 class Validator(Protocol):

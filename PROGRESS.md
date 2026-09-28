@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 0 | 93 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 20 | 73 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 6 | 0 | 6 |
-| **Total** | **206** | **44** | **162** |
+| **Total** | **206** | **64** | **142** |
 
-**Current position: Phase 0 — 44/2 done. Remaining items need the app installed and running; the exit gate closes Phase 0.**
+**Current position: Phase 0 44/2 (exit gate needs a running stack). Phase 1 20/73 — both release gates built and passing.**
 
 ---
 
@@ -108,7 +108,7 @@ Nothing user-facing. Everything below assumes this layer exists.
 ## Phase 1 — CV tailoring + HR ranking (the paid wedge)
 
 ### Files & storage
-- [ ] `files` table
+- [x] `files` table
 - [ ] S3/R2 client
 - [ ] `POST /v1/files/upload-url` — signed, direct-to-storage
 - [ ] Magic-byte type validation + 10 MB cap
@@ -128,17 +128,17 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] `profile_facts` table with addressable `fact_id` and `bullet_id`
 - [ ] `ParsedProfile` schema
 - [ ] Prompt v1 + agent implementation
-- [ ] Date normalizer for local formats (`Jan'23-now`, `01/2023 – Present`, `2023-current`)
+- [x] Date normalizer for local formats (`Jan'23-now`, `01/2023 – Present`, `2023-current`)
 - [ ] Bullet splitting with stable bullet IDs
 - [ ] Confidence scoring + `needs_review` below 0.7
 - [ ] Parse cache keyed on file checksum
 - [ ] Eval: 100 anonymized CVs, ≥ 0.92 precision on experience + education
 
 ### JD Parser Agent
-- [ ] `jobs` table + `description_structured` JSONB
+- [x] `jobs` table + `description_structured` JSONB
 - [ ] `StructuredJD` schema
 - [ ] Prompt v1 + agent implementation
-- [ ] Canonical skill vocabulary + normalizer (`Next.js` → `nextjs`)
+- [x] Canonical skill vocabulary + normalizer (`Next.js` → `nextjs`)
 - [ ] must / nice classification, defaulting to `nice` when unsignalled
 - [ ] Seniority inference from responsibilities, not just the title
 - [ ] Discriminatory-phrasing red-flag detection
@@ -148,31 +148,31 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Embedding client, model pinned, dimension 1536 recorded per row
 - [ ] Profile embedding job
 - [ ] Job embedding job
-- [ ] pgvector HNSW indexes (`vector_cosine_ops`)
-- [ ] `search_vector` generated columns + GIN indexes
+- [x] pgvector HNSW indexes (`vector_cosine_ops`)
+- [x] `search_vector` generated columns + GIN indexes
 - [ ] Embedding cache by content hash
 - [ ] Backfill command for an embedding-model change
 
 ### CV Tailoring Agent
-- [ ] `resumes` + `resume_versions` tables
-- [ ] `TailoredResume` schema with per-line `source_fact_ids`
+- [x] `resumes` + `resume_versions` tables
+- [x] `TailoredResume` schema with per-line `source_fact_ids`
 - [ ] Prompt v1 + agent implementation
 - [ ] Diff computation: base vs tailored, line-level with status
 - [ ] `POST /v1/resume-versions/{id}/approve`
 - [ ] Enforce approval before a version can attach to an application
 
 ### Fabrication Validator (release gate)
-- [ ] Structural check: every output line cites ≥ 1 `fact_id`
-- [ ] Ownership check: cited facts exist and belong to this profile
-- [ ] Numeric claim extraction + set comparison against source facts
-- [ ] Date range check against the source fact
-- [ ] Skill/tool vocabulary diff against the profile corpus
-- [ ] Scope-escalation verb tier comparison ("assisted" → "led")
+- [x] Structural check: every output line cites ≥ 1 `fact_id`
+- [x] Ownership check: cited facts exist and belong to this profile
+- [x] Numeric claim extraction + set comparison against source facts
+- [x] Date range check against the source fact
+- [x] Skill/tool vocabulary diff against the profile corpus
+- [x] Scope-escalation verb tier comparison ("assisted" → "led")
 - [ ] Entailment check (small model): does the source entail the rewrite?
-- [ ] Repair retry: one attempt with the specific complaint appended
-- [ ] `passed_with_warnings` path → per-line acknowledgement required
-- [ ] Failed validation never renders a PDF
-- [ ] **30-case adversarial fixture set — must block 100%**
+- [x] Repair retry: one attempt with the specific complaint appended
+- [x] `passed_with_warnings` path → per-line acknowledgement required
+- [x] Failed validation never renders a PDF
+- [x] **30-case adversarial fixture set — must block 100%**
 
 ### PDF rendering
 - [ ] HTML → PDF renderer
@@ -189,8 +189,8 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Semantic score: cosine against the job embedding
 - [ ] Rules score: years, seniority band, location, work authorization
 - [ ] Composite with per-job weights stored on the score row
-- [ ] Protected-attribute allowlist payload builder
-- [ ] **Allowlist unit test — release gate**
+- [x] Protected-attribute allowlist payload builder
+- [x] **Allowlist unit test — release gate**
 - [ ] Ranking Justification Agent, top 25 lazy generation
 - [ ] `POST /v1/applications/{id}/justify` for on-demand justification
 - [ ] Evidence citations linking each matched requirement to a `fact_id`

@@ -11,8 +11,6 @@ from typing import Any, Protocol, TypeVar
 
 from pydantic import BaseModel
 
-from app.core.config import settings
-
 SchemaT = TypeVar("SchemaT", bound=BaseModel)
 
 
@@ -94,6 +92,9 @@ def price_usd(model: str, input_tokens: int, output_tokens: int) -> float:
 
 
 def get_llm_client() -> LLMClient:
+    # Imported here so FakeLLMClient stays usable without a populated environment.
+    from app.core.config import settings
+
     if settings.llm_provider == "fake":
         return FakeLLMClient()
     raise NotImplementedError(

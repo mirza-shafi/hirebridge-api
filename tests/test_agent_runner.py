@@ -5,13 +5,8 @@ from __future__ import annotations
 import pytest
 from pydantic import BaseModel
 
-from app.agents.base import (
-    AgentConfig,
-    AgentFailed,
-    AgentRunner,
-    TransientProviderError,
-    ValidationFailure,
-)
+from app.agents.base import AgentConfig, AgentRunner
+from app.agents.errors import AgentFailed, TransientProviderError, ValidationFailure
 from app.agents.llm import Completion, FakeLLMClient
 from app.models import AgentRun, RunStatus
 
