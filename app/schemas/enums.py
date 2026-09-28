@@ -19,3 +19,20 @@ class ValidatorStatus(str, enum.Enum):
 class Severity(str, enum.Enum):
     HARD = "hard"
     SOFT = "soft"
+
+
+class FactKind(str, enum.Enum):
+    EXPERIENCE = "experience"
+    EDUCATION = "education"
+    SKILL = "skill"
+    PROJECT = "project"
+    CERTIFICATION = "certification"
+    AWARD = "award"
+    PUBLICATION = "publication"
+    LANGUAGE = "language"
+
+
+class FactSource(str, enum.Enum):
+    PARSED_RESUME = "parsed_resume"
+    USER_ENTERED = "user_entered"
+    USER_EDITED = "user_edited"

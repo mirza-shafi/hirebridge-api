@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 20 | 73 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 34 | 59 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
-| Blocked / needs a decision | 6 | 0 | 6 |
-| **Total** | **206** | **64** | **142** |
+| Blocked / needs a decision | 8 | 1 | 7 |
+| **Total** | **208** | **79** | **129** |
 
-**Current position: Phase 0 44/2 (exit gate needs a running stack). Phase 1 20/73 — both release gates built and passing.**
+**Current position: Phase 0 44/2 · Phase 1 34/59. Both release gates green; both LLM providers implemented. Next: embeddings, the tailoring agent, and ranking.**
 
 ---
 
@@ -117,31 +117,31 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Signed download URLs, short TTL
 
 ### Text extraction
-- [ ] PDF extraction, layout-aware (handles two-column CVs)
-- [ ] DOCX extraction
+- [x] PDF extraction, layout-aware (handles two-column CVs)
+- [x] DOCX extraction
 - [ ] OCR fallback for scanned image CVs
-- [ ] Low-yield heuristic → surface "we only found N items" instead of a sparse profile
-- [ ] Header/footer contamination stripping
+- [x] Low-yield heuristic → surface "we only found N items" instead of a sparse profile
+- [x] Header/footer contamination stripping
 
 ### Resume Parser Agent
 - [ ] `candidate_profiles` table
 - [ ] `profile_facts` table with addressable `fact_id` and `bullet_id`
-- [ ] `ParsedProfile` schema
-- [ ] Prompt v1 + agent implementation
+- [x] `ParsedProfile` schema
+- [x] Prompt v1 + agent implementation
 - [x] Date normalizer for local formats (`Jan'23-now`, `01/2023 – Present`, `2023-current`)
-- [ ] Bullet splitting with stable bullet IDs
-- [ ] Confidence scoring + `needs_review` below 0.7
+- [x] Bullet splitting with stable bullet IDs
+- [x] Confidence scoring + `needs_review` below 0.7
 - [ ] Parse cache keyed on file checksum
 - [ ] Eval: 100 anonymized CVs, ≥ 0.92 precision on experience + education
 
 ### JD Parser Agent
 - [x] `jobs` table + `description_structured` JSONB
-- [ ] `StructuredJD` schema
-- [ ] Prompt v1 + agent implementation
+- [x] `StructuredJD` schema
+- [x] Prompt v1 + agent implementation
 - [x] Canonical skill vocabulary + normalizer (`Next.js` → `nextjs`)
-- [ ] must / nice classification, defaulting to `nice` when unsignalled
-- [ ] Seniority inference from responsibilities, not just the title
-- [ ] Discriminatory-phrasing red-flag detection
+- [x] must / nice classification, defaulting to `nice` when unsignalled
+- [x] Seniority inference from responsibilities, not just the title
+- [x] Discriminatory-phrasing red-flag detection
 - [ ] Eval: 50 JDs, ≥ 0.85 agreement on the must/nice split
 
 ### Embeddings & search
@@ -156,7 +156,7 @@ Nothing user-facing. Everything below assumes this layer exists.
 ### CV Tailoring Agent
 - [x] `resumes` + `resume_versions` tables
 - [x] `TailoredResume` schema with per-line `source_fact_ids`
-- [ ] Prompt v1 + agent implementation
+- [x] Prompt v1 + agent implementation
 - [ ] Diff computation: base vs tailored, line-level with status
 - [ ] `POST /v1/resume-versions/{id}/approve`
 - [ ] Enforce approval before a version can attach to an application
@@ -302,7 +302,9 @@ Nothing user-facing. Everything below assumes this layer exists.
 
 ## Blocked / needs a decision
 
-- [ ] Choose LLM provider(s) and confirm zero-retention endpoints
+- [x] Choose LLM provider(s) — both implemented, selected by `LLM_PROVIDER` (ADR-0007)
+- [ ] Confirm zero-retention endpoints with whichever provider you enable
+- [ ] Fill in `config/model_pricing.json` for the models you configure
 - [ ] Choose object storage: Cloudflare R2 vs AWS S3
 - [ ] Choose transactional email provider
 - [ ] Decide the OCR approach for scanned CVs

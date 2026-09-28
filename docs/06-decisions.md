@@ -68,3 +68,23 @@
 **Decision.** Job content enters only from the employer who owns it or via an official, authorized API.
 
 **Consequences.** Slower supply growth; the candidate-side tools (tailoring, interview) are built to work against *any* pasted JD so they retain value with an empty board. Avoids ToS breach, IP bans, and an unfixable diligence problem later.
+
+---
+
+## ADR-0007 — Both LLM providers implemented, chosen by environment
+**Date:** 2026-09-28 · **Status:** Accepted
+
+**Context.** Picking a provider was blocking Phase 1: the parser agents cannot be written
+against an interface that has no implementation. But the choice depends on pricing, latency
+from Dhaka, and payment access — none of which should hold up building the agents.
+
+**Decision.** Implement `LLMClient` for both Anthropic (structured output via a forced tool
+call) and OpenAI (strict `json_schema`), selected by `LLM_PROVIDER`. Both are built on httpx
+rather than a vendor SDK, so provider errors map onto `TransientProviderError` in one place
+and the runner's retry policy behaves identically either way. Pricing lives in
+`config/model_pricing.json`, not in source.
+
+**Consequences.** The provider is now an environment change, which also makes A/B comparison
+on the same eval suite possible. Cost: two adapters to maintain, and `strictify()` exists
+solely to reshape Pydantic schemas for OpenAI's strict mode. An unpriced model reports $0
+with a warning rather than a guess, so the gap is visible in the cost dashboard.

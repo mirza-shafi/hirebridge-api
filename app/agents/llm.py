@@ -6,10 +6,15 @@ Provider is swapped in config, never in an agent body (docs/03-agent-specs.md §
 
 from __future__ import annotations
 
+import json
+import logging
+import pathlib
 from dataclasses import dataclass
 from typing import Any, Protocol, TypeVar
 
 from pydantic import BaseModel
+
+log = logging.getLogger("hirebridge.llm")
 
 SchemaT = TypeVar("SchemaT", bound=BaseModel)
 
@@ -80,24 +85,78 @@ class FakeLLMClient:
         )
 
 
-# USD per 1M tokens, (input, output). Fill in when the provider is chosen —
-# an unlisted model costs 0, which makes the gap visible in the cost dashboard
-# rather than silently under-reporting.
-PRICING: dict[str, tuple[float, float]] = {}
+# Pricing lives in config/model_pricing.json, not in source: provider prices change, and a
+# stale number in code is worse than a visible gap. An unlisted model warns once and costs 0,
+# so the hole shows up in the cost dashboard instead of silently under-reporting.
+PRICING_PATH = pathlib.Path(__file__).resolve().parents[2] / "config" / "model_pricing.json"
+
+_pricing: dict[str, tuple[float, float]] | None = None
+_warned: set[str] = set()
+
+
+def load_pricing(path: pathlib.Path | None = None) -> dict[str, tuple[float, float]]:
+    global _pricing
+    if _pricing is not None and path is None:
+        return _pricing
+
+    target = path or PRICING_PATH
+    table: dict[str, tuple[float, float]] = {}
+    try:
+        raw = json.loads(target.read_text())
+        for model, rates in (raw.get("models") or {}).items():
+            table[model] = (float(rates["input"]), float(rates["output"]))
+    except FileNotFoundError:
+        log.warning("Model pricing file not found at %s; costs will report as 0.", target)
+    except (ValueError, KeyError, TypeError) as exc:
+        log.warning("Model pricing file at %s is malformed (%s); costs will report as 0.",
+                    target, exc)
+
+    if path is None:
+        _pricing = table
+    return table
 
 
 def price_usd(model: str, input_tokens: int, output_tokens: int) -> float:
-    rate_in, rate_out = PRICING.get(model, (0.0, 0.0))
+    table = load_pricing()
+    rates = table.get(model)
+    if rates is None:
+        if model not in _warned:
+            _warned.add(model)
+            log.warning(
+                "No price configured for model %r — add it to config/model_pricing.json. "
+                "Runs will report $0 until then.",
+                model,
+            )
+        return 0.0
+    rate_in, rate_out = rates
     return (input_tokens * rate_in + output_tokens * rate_out) / 1_000_000
 
 
 def get_llm_client() -> LLMClient:
+    """Resolve the configured provider.
+
+    Swapping providers is an environment change, never a code change — the agents only ever
+    see this interface (docs/01-architecture.md §5).
+    """
     # Imported here so FakeLLMClient stays usable without a populated environment.
     from app.core.config import settings
 
     if settings.llm_provider == "fake":
         return FakeLLMClient()
-    raise NotImplementedError(
-        f"Provider '{settings.llm_provider}' is not wired yet. "
-        "See PROGRESS.md → Blocked / needs a decision."
-    )
+
+    if not settings.llm_api_key:
+        raise RuntimeError(
+            f"LLM_PROVIDER is '{settings.llm_provider}' but LLM_API_KEY is not set."
+        )
+
+    if settings.llm_provider == "anthropic":
+        from app.agents.providers.anthropic import AnthropicClient
+
+        return AnthropicClient(settings.llm_api_key)
+
+    if settings.llm_provider == "openai":
+        from app.agents.providers.openai import OpenAIClient
+
+        return OpenAIClient(settings.llm_api_key)
+
+    raise RuntimeError(f"Unknown LLM_PROVIDER: {settings.llm_provider!r}")

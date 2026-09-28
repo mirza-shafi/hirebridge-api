@@ -1,0 +1,11 @@
+{
+  "_comment": [
+    "USD per 1,000,000 tokens. Verify against the provider's current pricing page before",
+    "trusting the cost dashboard — these are not baked into the code on purpose, because",
+    "stale prices in source are worse than an obvious gap.",
+    "A model missing from this file logs a warning and is costed at 0, so the gap shows up",
+    "in the dashboard rather than silently under-reporting.",
+    "Fill in the models named in your .env (MODEL_SMALL / MODEL_MID / MODEL_LARGE)."
+  ],
+  "models": {}
+}

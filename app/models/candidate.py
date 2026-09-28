@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import enum
 import uuid
 from datetime import date, datetime
 from typing import Any
@@ -11,23 +10,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, Timestamps, UUIDPrimaryKey
-
-
-class FactKind(str, enum.Enum):
-    EXPERIENCE = "experience"
-    EDUCATION = "education"
-    SKILL = "skill"
-    PROJECT = "project"
-    CERTIFICATION = "certification"
-    AWARD = "award"
-    PUBLICATION = "publication"
-    LANGUAGE = "language"
-
-
-class FactSource(str, enum.Enum):
-    PARSED_RESUME = "parsed_resume"
-    USER_ENTERED = "user_entered"
-    USER_EDITED = "user_edited"
+from app.schemas.enums import FactKind, FactSource
 
 
 class CandidateProfile(Base, UUIDPrimaryKey, Timestamps):
