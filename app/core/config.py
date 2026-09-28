@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     storage_bucket: str | None = None
     storage_access_key: str | None = None
     storage_secret_key: str | None = None
+    local_storage_path: str = "./.storage"
 
     # Observability
     sentry_dsn: str | None = None

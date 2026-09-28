@@ -15,7 +15,7 @@ from arq.connections import RedisSettings
 
 from app.core.config import settings
 from app.core.logging import configure_logging
-from app.workers.tasks import ping
+from app.workers.tasks import embed_profile, parse_job, parse_resume, rank_job, tailor_cv
 
 QUEUE_PARSE = "hb:parse"
 QUEUE_GENERATE = "hb:generate"
@@ -31,7 +31,7 @@ async def shutdown(ctx: dict[str, object]) -> None:
 
 
 class WorkerSettings:
-    functions = [ping]
+    functions = [parse_resume, parse_job, tailor_cv, rank_job, embed_profile]
     redis_settings = RedisSettings.from_dsn(settings.redis_url)
     queue_name = os.getenv("QUEUE_NAME", QUEUE_PARSE)
     on_startup = startup
