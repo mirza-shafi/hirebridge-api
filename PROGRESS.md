@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 34 | 59 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 38 | 55 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 8 | 1 | 7 |
-| **Total** | **208** | **79** | **129** |
+| **Total** | **208** | **83** | **125** |
 
-**Current position: Phase 0 44/2 · Phase 1 34/59. Both release gates green; both LLM providers implemented. Next: embeddings, the tailoring agent, and ranking.**
+**Current position: Phase 0 44/2 · Phase 1 38/55. Candidate side is built end to end (parse → embed → tailor → validate → diff). Next: ranking, then the API routes that expose all of it.**
 
 ---
 
@@ -145,19 +145,19 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Eval: 50 JDs, ≥ 0.85 agreement on the must/nice split
 
 ### Embeddings & search
-- [ ] Embedding client, model pinned, dimension 1536 recorded per row
+- [x] Embedding client, model pinned, dimension 1536 recorded per row
 - [ ] Profile embedding job
 - [ ] Job embedding job
 - [x] pgvector HNSW indexes (`vector_cosine_ops`)
 - [x] `search_vector` generated columns + GIN indexes
-- [ ] Embedding cache by content hash
+- [x] Embedding cache by content hash
 - [ ] Backfill command for an embedding-model change
 
 ### CV Tailoring Agent
 - [x] `resumes` + `resume_versions` tables
 - [x] `TailoredResume` schema with per-line `source_fact_ids`
 - [x] Prompt v1 + agent implementation
-- [ ] Diff computation: base vs tailored, line-level with status
+- [x] Diff computation: base vs tailored, line-level with status
 - [ ] `POST /v1/resume-versions/{id}/approve`
 - [ ] Enforce approval before a version can attach to an application
 
@@ -168,7 +168,7 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [x] Date range check against the source fact
 - [x] Skill/tool vocabulary diff against the profile corpus
 - [x] Scope-escalation verb tier comparison ("assisted" → "led")
-- [ ] Entailment check (small model): does the source entail the rewrite?
+- [x] Entailment check (small model): does the source entail the rewrite?
 - [x] Repair retry: one attempt with the specific complaint appended
 - [x] `passed_with_warnings` path → per-line acknowledgement required
 - [x] Failed validation never renders a PDF

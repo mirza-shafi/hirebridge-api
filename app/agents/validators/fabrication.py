@@ -178,6 +178,17 @@ class FabricationValidator:
             else ValidatorStatus.PASSED.value
         )
 
+    def _resolve(self, fact_id: str) -> SourceFact | None:
+        """Resolve a citation to the narrowest unit it names.
+
+        A line citing `f1#b2` is checked against that one bullet, not the whole role — so a
+        figure that appears in bullet 3 cannot be used to justify a claim rewritten from
+        bullet 2. Falls back to the parent fact when a bullet is not separately addressable.
+        """
+        if exact := self.facts.get(fact_id):
+            return exact
+        return self.facts.get(fact_id.split("#")[0])
+
     # --- deterministic checks -------------------------------------------------
 
     def _check_line(self, line: TailoredLine) -> list[Finding]:
@@ -189,14 +200,14 @@ class FabricationValidator:
                         "Content line cites no source fact.")
             ]
 
-        unknown = [fid for fid in line.source_fact_ids if fid.split("#")[0] not in self.facts]
+        unknown = [fid for fid in line.source_fact_ids if self._resolve(fid) is None]
         if unknown:
             return [
                 Finding("citation_valid", Severity.HARD, line.line_id,
                         f"Cites fact ids that are not in this profile: {', '.join(unknown)}.")
             ]
 
-        sources = [self.facts[fid.split("#")[0]] for fid in line.source_fact_ids]
+        sources = [f for fid in line.source_fact_ids if (f := self._resolve(fid))]
         source_text = " ".join(s.text for s in sources)
 
         # 1. Numeric claims must exist in the source.
@@ -291,7 +302,7 @@ class FabricationValidator:
 
     async def _check_entailment(self, line: TailoredLine) -> list[Finding]:
         assert self.entailment is not None
-        sources = [self.facts[fid.split("#")[0]] for fid in line.source_fact_ids]
+        sources = [f for fid in line.source_fact_ids if (f := self._resolve(fid))]
         source_text = " ".join(s.text for s in sources)
         if await self.entailment(source=source_text, rewrite=line.text):
             return []

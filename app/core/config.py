@@ -33,8 +33,11 @@ class Settings(BaseSettings):
     model_small: str | None = None
     model_mid: str | None = None
     model_large: str | None = None
-    embedding_model: str | None = None
-    embedding_dim: int = 1536
+    # Anthropic has no embeddings API, so this is configured independently of
+    # llm_provider. Claude for generation + OpenAI/Voyage for embeddings is normal.
+    embedding_provider: Literal["fake", "openai", "voyage"] = "fake"
+    embedding_api_key: str | None = None
+    embedding_model: str = "fake-embedding"
 
     # Storage (Phase 1)
     storage_endpoint: str | None = None
