@@ -30,6 +30,12 @@ MODEL_DIMENSIONS: dict[str, int] = {
     "voyage-3": 1024,
     "voyage-3-lite": 512,
     "voyage-code-3": 1024,
+    # Ollama models, for a fully local stack. Note these are NOT 1536 — EMBEDDING_DIM
+    # must match, and the vector columns are sized from it at migration time.
+    "nomic-embed-text": 768,
+    "mxbai-embed-large": 1024,
+    "all-minilm": 384,
+    "bge-m3": 1024,
     "fake-embedding": 1536,
 }
 
@@ -168,6 +174,11 @@ def get_embedding_client() -> EmbeddingClient:
     provider = settings.embedding_provider
     if provider == "fake":
         return FakeEmbeddingClient()
+    if provider == "ollama":
+        # Runs on the machine; no key to check.
+        from app.agents.providers.ollama import OllamaEmbeddingClient
+
+        return OllamaEmbeddingClient(settings.ollama_base_url)
     if not settings.embedding_api_key:
         raise RuntimeError(
             f"EMBEDDING_PROVIDER is {provider!r} but EMBEDDING_API_KEY is not set. "

@@ -67,7 +67,22 @@ def _decode(token: str) -> dict[str, Any]:
     )
 
 
+# The single local identity used when DEV_AUTH is on. Deliberately obvious in logs and
+# in the database, so nobody mistakes seeded demo activity for a real user.
+DEV_PRINCIPAL = Principal(
+    user_id="user_dev_local",
+    email="dev@hirebridge.local",
+    org_id="org_dev_local",
+    role="org_admin",
+)
+
+
 async def current_principal(request: Request) -> Principal:
+    if settings.dev_auth:
+        # Settings refuses dev_auth outside ENVIRONMENT=local, so reaching here in a
+        # deployed environment is impossible rather than merely discouraged.
+        return DEV_PRINCIPAL
+
     header = request.headers.get("Authorization", "")
     if not header.startswith("Bearer "):
         raise Forbidden("Missing bearer token.")

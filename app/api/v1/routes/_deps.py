@@ -14,7 +14,7 @@ from app.core.config import settings
 from app.core.errors import NotFound
 from app.core.security import CurrentPrincipal, Principal
 from app.db.session import get_session
-from app.models import User
+from app.models import Organization, User
 
 _pool: ArqRedis | None = None
 
@@ -39,8 +39,27 @@ async def current_user(
     return user
 
 
-async def current_org_id(principal: Principal = CurrentPrincipal) -> uuid.UUID:
-    return uuid.UUID(principal.require_org())
+async def current_org_id(
+    principal: Principal = CurrentPrincipal,
+    session: AsyncSession = Depends(get_session),
+) -> uuid.UUID:
+    """Resolve the caller's organisation to OUR primary key.
+
+    The token carries the identity provider's id (`org_2abc…`), which is not a UUID and
+    never matches a row id. Parsing it as one raised on every employer request. The mapping
+    lives in `organizations.clerk_org_id`, populated by the webhook.
+    """
+    external_id = principal.require_org()
+    org = (
+        await session.execute(
+            select(Organization).where(Organization.clerk_org_id == external_id)
+        )
+    ).scalar_one_or_none()
+    if org is None:
+        raise NotFound(
+            "Your organization is still being set up. Try again in a moment."
+        )
+    return org.id
 
 
 CurrentUser = Annotated[User, Depends(current_user)]

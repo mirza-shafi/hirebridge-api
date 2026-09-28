@@ -144,6 +144,12 @@ def get_llm_client() -> LLMClient:
     if settings.llm_provider == "fake":
         return FakeLLMClient()
 
+    if settings.llm_provider == "ollama":
+        # A model on the machine: no key, and nothing leaves the network.
+        from app.agents.providers.ollama import OllamaClient
+
+        return OllamaClient(settings.ollama_base_url)
+
     if not settings.llm_api_key:
         raise RuntimeError(
             f"LLM_PROVIDER is '{settings.llm_provider}' but LLM_API_KEY is not set."

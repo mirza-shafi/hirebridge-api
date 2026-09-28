@@ -13,6 +13,8 @@ from alembic import op
 from pgvector.sqlalchemy import Vector
 from sqlalchemy.dialects import postgresql
 
+from app.core.config import settings
+
 revision: str = "0002_phase1_candidate_job"
 down_revision: str | None = "0001_initial"
 branch_labels: str | Sequence[str] | None = None
@@ -21,7 +23,11 @@ depends_on: str | Sequence[str] | None = None
 TS = sa.DateTime(timezone=True)
 NOW = sa.text("now()")
 UUID = postgresql.UUID(as_uuid=True)
-EMBEDDING_DIM = 1536
+
+# Sized from config, not hardcoded: a local model (nomic-embed-text is 768) and a
+# hosted one (text-embedding-3-small is 1536) differ, and a mismatch between the column
+# and the model is silent — pgvector rejects the insert, but only at write time.
+EMBEDDING_DIM = settings.embedding_dim
 
 
 def _base() -> list[sa.Column]:

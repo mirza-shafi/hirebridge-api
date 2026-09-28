@@ -37,7 +37,7 @@ from app.models import (
 from app.repositories.ranking import score_applications
 from app.schemas.resume import TailoredResume
 from app.services import runs as run_service
-from app.services.embedding_text import job_embedding_text, profile_embedding_text
+from app.services.embedding_text import job_embedding_text, profile_corpus
 from app.services.extraction import extract
 from app.services.pdf.render import render_pdf
 from app.services.resume_diff import compute_diff
@@ -87,6 +87,11 @@ async def parse_resume(ctx: dict[str, Any], run_id: str, resume_id: str) -> dict
                 ProfileFact(profile_id=profile.id, source_resume_id=resume.id, **row)
             )
         profile.completeness_score = completeness_score(rows)
+        # Keep the full-text corpus in step with the facts; otherwise lexical ranking sees
+        # only the headline (migration 0004).
+        profile.search_text = profile_corpus(
+            headline=profile.headline, summary=profile.summary, fact_rows=rows
+        )
         await session.flush()
 
         await run_service.mark_succeeded(
@@ -426,11 +431,12 @@ async def embed_profile(ctx: dict[str, Any], profile_id: str) -> dict[str, Any]:
                 select(ProfileFact).where(ProfileFact.profile_id == profile.id)
             )
         ).scalars().all()
-        text = profile_embedding_text(
+        text = profile_corpus(
             headline=profile.headline,
             summary=profile.summary,
             fact_rows=[{"kind": f.kind, "payload": f.payload} for f in facts],
         )
+        profile.search_text = text
         digest = content_hash(text, settings.embedding_model)
         if profile.embedding is not None and profile.embedding_model == digest:
             return {"ok": True, "cached": True}

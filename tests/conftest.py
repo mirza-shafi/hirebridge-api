@@ -20,6 +20,10 @@ os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test:test@localhost:
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("CLERK_ISSUER", "https://test.clerk.accounts.dev")
 os.environ.setdefault("ENVIRONMENT", "local")
+# Forced, not defaulted: a developer with DEV_AUTH=true exported in their shell would
+# otherwise see auth tests fail for reasons that have nothing to do with their change.
+os.environ["DEV_AUTH"] = "false"
+os.environ["CLERK_ISSUER"] = "https://test.clerk.accounts.dev"
 os.environ.setdefault("LLM_PROVIDER", "fake")
 os.environ.setdefault("EMBEDDING_PROVIDER", "fake")
 

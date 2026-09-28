@@ -14,6 +14,20 @@ from __future__ import annotations
 from typing import Any
 
 
+def profile_corpus(
+    *,
+    headline: str | None,
+    summary: str | None,
+    fact_rows: list[dict[str, Any]],
+) -> str:
+    """The same text serves two jobs: the vector, and the full-text index.
+
+    Keeping one builder means the lexical and semantic halves of ranking always see the
+    same content, so a profile cannot score well on one and blindly on the other.
+    """
+    return profile_embedding_text(headline=headline, summary=summary, fact_rows=fact_rows)
+
+
 def profile_embedding_text(
     *,
     headline: str | None,

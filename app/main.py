@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -19,6 +20,11 @@ from app.db.session import dispose_engine
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     configure_logging(settings.log_level)
     init_observability()
+    if settings.dev_auth:
+        logging.getLogger("hirebridge").warning(
+            "DEV_AUTH is on: every request is treated as the local demo user. "
+            "Never run this outside local development."
+        )
     yield
     await dispose_engine()
 

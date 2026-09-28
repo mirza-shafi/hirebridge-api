@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,21 +23,32 @@ class Settings(BaseSettings):
     redis_url: str
 
     # Auth
-    clerk_issuer: str
+    # DEV_AUTH replaces token verification with a fixed local identity so the stack
+    # runs without a Clerk account. It is refused outside `local` — see the validator
+    # below, which is the thing standing between a convenience and an open door.
+    dev_auth: bool = False
+    dev_auth_token: str = "dev-token"
+    clerk_issuer: str = ""
     clerk_audience: str | None = None
     clerk_webhook_secret: str | None = None
 
     # LLM (Phase 1)
-    llm_provider: Literal["fake", "anthropic", "openai"] = "fake"
+    llm_provider: Literal["fake", "anthropic", "openai", "ollama"] = "fake"
     llm_api_key: str | None = None
     model_small: str | None = None
     model_mid: str | None = None
     model_large: str | None = None
     # Anthropic has no embeddings API, so this is configured independently of
     # llm_provider. Claude for generation + OpenAI/Voyage for embeddings is normal.
-    embedding_provider: Literal["fake", "openai", "voyage"] = "fake"
+    embedding_provider: Literal["fake", "openai", "voyage", "ollama"] = "fake"
     embedding_api_key: str | None = None
     embedding_model: str = "fake-embedding"
+    # Must match the model above. The vector columns are sized from this at migration
+    # time, so changing it on a populated database needs a backfill.
+    embedding_dim: int = 1536
+
+    # Local model server (Ollama). Used when either provider is set to "ollama".
+    ollama_base_url: str = "http://localhost:11434"
 
     # Storage (Phase 1)
     storage_endpoint: str | None = None
@@ -58,6 +69,17 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [o.strip() for o in v.split(",") if o.strip()]
         return v
+
+    @model_validator(mode="after")
+    def _guard_dev_auth(self) -> Settings:
+        if self.dev_auth and self.environment != "local":
+            raise ValueError(
+                "DEV_AUTH is only permitted when ENVIRONMENT=local. It bypasses all "
+                "authentication; enabling it anywhere else would expose every account."
+            )
+        if not self.dev_auth and not self.clerk_issuer:
+            raise ValueError("CLERK_ISSUER is required unless DEV_AUTH is enabled.")
+        return self
 
     @property
     def is_production(self) -> bool:
