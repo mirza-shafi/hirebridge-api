@@ -1,0 +1,61 @@
+[project]
+name = "hirebridge-api"
+version = "0.1.0"
+description = "HireBridge backend — FastAPI + ARQ + Postgres/pgvector"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30",
+    "alembic>=1.14",
+    "pgvector>=0.3.6",
+    "redis>=5.2",
+    "arq>=0.26",
+    "httpx>=0.28",
+    "pyjwt[crypto]>=2.10",
+    "python-multipart>=0.0.17",
+    "sse-starlette>=2.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "types-redis",
+    "asgi-lifespan>=2.1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["app", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "A", "C4", "SIM", "RUF", "ASYNC"]
+ignore = ["B008"]  # FastAPI Depends() in defaults is the documented pattern
+
+[tool.ruff.lint.per-file-ignores]
+"migrations/*" = ["E501", "N999", "RUF"]
+"tests/*" = ["A"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+warn_unreachable = true
+disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+module = ["arq.*", "pgvector.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q --cov=app --cov-report=term-missing"
