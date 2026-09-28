@@ -27,7 +27,7 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
-| Phase 0 — Foundation | 46 | 0 | 46 |
+| Phase 0 — Foundation | 46 | 36 | 10 |
 | Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 0 | 93 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
@@ -35,9 +35,9 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 6 | 0 | 6 |
-| **Total** | **206** | **0** | **206** |
+| **Total** | **206** | **36** | **170** |
 
-**Current position: Phase 0 — Foundation. Nothing started yet; all 206 tasks pending.**
+**Current position: Phase 0 scaffolded — 36 done, 170 pending. Phase 0 is not closed until its exit gate passes (see below).**
 
 ---
 
@@ -46,56 +46,56 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 Nothing user-facing. Everything below assumes this layer exists.
 
 ### Repo & tooling
-- [ ] `pyproject.toml` (uv or poetry), Python 3.12 pinned
-- [ ] ruff + mypy strict config
-- [ ] pre-commit hooks (ruff, mypy, trailing whitespace)
-- [ ] Package layout: `app/{api,agents,workers,db,services,schemas,core}`
-- [ ] pytest + coverage config
-- [ ] `FakeLLMClient` fixture — tests never call a provider
+- [x] `pyproject.toml` (uv or poetry), Python 3.12 pinned
+- [x] ruff + mypy strict config
+- [x] pre-commit hooks (ruff, mypy, trailing whitespace)
+- [x] Package layout: `app/{api,agents,workers,db,services,schemas,core}`
+- [x] pytest + coverage config
+- [x] `FakeLLMClient` fixture — tests never call a provider
 
 ### Config & runtime
-- [ ] `Settings` via pydantic-settings, validated at boot (fail fast on missing env)
-- [ ] `.env.example` covering every variable
-- [ ] Structured JSON logging with request-id + run-id on every line
-- [ ] Request-id middleware
-- [ ] Exception handlers emitting RFC 9457 problem details
-- [ ] `/healthz` (liveness) and `/readyz` (db + redis + provider reachability)
-- [ ] PII scrubbing filter on the log formatter
+- [x] `Settings` via pydantic-settings, validated at boot (fail fast on missing env)
+- [x] `.env.example` covering every variable
+- [x] Structured JSON logging with request-id + run-id on every line
+- [x] Request-id middleware
+- [x] Exception handlers emitting RFC 9457 problem details
+- [x] `/healthz` (liveness) and `/readyz` (db + redis + provider reachability)
+- [x] PII scrubbing filter on the log formatter
 
 ### Database
-- [ ] `docker-compose.yml`: postgres 16 + pgvector, redis
-- [ ] SQLAlchemy async engine + session dependency
-- [ ] Alembic init + first migration
-- [ ] Base model mixin: UUIDv7 pk, `created_at`, `updated_at`
-- [ ] `organizations` table
-- [ ] `users` table (mirrors Clerk)
-- [ ] `memberships` table with roles
-- [ ] Repository base class enforcing `org_id` scoping
-- [ ] `audit_logs` table (append-only)
+- [x] `docker-compose.yml`: postgres 16 + pgvector, redis
+- [x] SQLAlchemy async engine + session dependency
+- [x] Alembic init + first migration
+- [x] Base model mixin: UUIDv7 pk, `created_at`, `updated_at`
+- [x] `organizations` table
+- [x] `users` table (mirrors Clerk)
+- [x] `memberships` table with roles
+- [x] Repository base class enforcing `org_id` scoping
+- [x] `audit_logs` table (append-only)
 
 ### Queue & async infrastructure
-- [ ] ARQ worker process + settings
-- [ ] Separate queues: `parse`, `generate`, `interview` (do this now, not later)
-- [ ] `agent_runs` table
-- [ ] `AgentRun` lifecycle helper — no model call happens without a row
-- [ ] Redis pub/sub channel per run
-- [ ] SSE endpoint `GET /v1/runs/{id}/events`
-- [ ] `GET /v1/runs/{id}` reconciliation endpoint
+- [x] ARQ worker process + settings
+- [x] Separate queues: `parse`, `generate`, `interview` (do this now, not later)
+- [x] `agent_runs` table
+- [x] `AgentRun` lifecycle helper — no model call happens without a row
+- [x] Redis pub/sub channel per run
+- [x] SSE endpoint `GET /v1/runs/{id}/events`
+- [x] `GET /v1/runs/{id}` reconciliation endpoint
 - [ ] `Idempotency-Key` middleware + key storage
 - [ ] Token budget enforcement + `aborted_budget` status
 - [ ] Retry policy: 3 transient, 1 validation-repair, then hard fail
-- [ ] Graceful worker shutdown — drain in-flight jobs on SIGTERM
+- [x] Graceful worker shutdown — drain in-flight jobs on SIGTERM
 
 ### Auth
-- [ ] Clerk JWKS verification dependency (cached keys)
-- [ ] `current_user` / `current_org` dependencies
-- [ ] Role enforcement (`candidate`, `recruiter`, `hiring_manager`, `org_admin`, `platform_admin`)
+- [x] Clerk JWKS verification dependency (cached keys)
+- [x] `current_user` / `current_org` dependencies
+- [x] Role enforcement (`candidate`, `recruiter`, `hiring_manager`, `org_admin`, `platform_admin`)
 - [ ] Clerk webhook → local user/org sync
-- [ ] Cross-tenant access returns 404, never 403
+- [x] Cross-tenant access returns 404, never 403
 
 ### CI/CD
-- [ ] GitHub Actions: ruff + mypy + pytest on PR
-- [ ] Dockerfile (single image, api and worker entrypoints)
+- [x] GitHub Actions: ruff + mypy + pytest on PR
+- [x] Dockerfile (single image, api and worker entrypoints)
 - [ ] Staging compose project on the VPS
 - [ ] Deploy workflow: build → registry → pull → `compose up -d`
 - [ ] Alembic migration as a pre-start step
