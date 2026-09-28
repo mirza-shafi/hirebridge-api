@@ -28,16 +28,16 @@ echo "pending: $(grep -c '^- \[ \]' PROGRESS.md)  done: $(grep -c '^- \[x\]' PRO
 | Phase | Tasks | Done | Pending |
 |---|---:|---:|---:|
 | Phase 0 — Foundation | 46 | 44 | 2 |
-| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 38 | 55 |
+| Phase 1 — CV tailoring + HR ranking (the paid wedge) | 93 | 46 | 47 |
 | Phase 2 — Interview Studio (text) | 24 | 0 | 24 |
 | Phase 3 — Voice | 12 | 0 | 12 |
 | Phase 4 — Job Intelligence & distribution | 8 | 0 | 8 |
 | Phase 5 — Commercial & operations | 8 | 0 | 8 |
 | Cross-cutting (ongoing — never marked done) | 9 | 0 | 9 |
 | Blocked / needs a decision | 8 | 1 | 7 |
-| **Total** | **208** | **83** | **125** |
+| **Total** | **208** | **91** | **117** |
 
-**Current position: Phase 0 44/2 · Phase 1 38/55. Candidate side is built end to end (parse → embed → tailor → validate → diff). Next: ranking, then the API routes that expose all of it.**
+**Current position: Phase 0 44/2 · Phase 1 46/47. Both sides of the pipeline are built and unit-tested. Next: the API routes and workers that wire them together, then the web screens.**
 
 ---
 
@@ -182,18 +182,18 @@ Nothing user-facing. Everything below assumes this layer exists.
 - [ ] Store as a file + serve via signed URL
 
 ### Ranking
-- [ ] `applications` table with `profile_snapshot`
-- [ ] `application_scores` table, versioned not overwritten
-- [ ] `application_events` audit table
+- [x] `applications` table with `profile_snapshot`
+- [x] `application_scores` table, versioned not overwritten
+- [x] `application_events` audit table
 - [ ] Lexical score: `ts_rank` against must/nice terms
-- [ ] Semantic score: cosine against the job embedding
-- [ ] Rules score: years, seniority band, location, work authorization
-- [ ] Composite with per-job weights stored on the score row
+- [x] Semantic score: cosine against the job embedding
+- [x] Rules score: years, seniority band, location, work authorization
+- [x] Composite with per-job weights stored on the score row
 - [x] Protected-attribute allowlist payload builder
 - [x] **Allowlist unit test — release gate**
-- [ ] Ranking Justification Agent, top 25 lazy generation
+- [x] Ranking Justification Agent, top 25 lazy generation
 - [ ] `POST /v1/applications/{id}/justify` for on-demand justification
-- [ ] Evidence citations linking each matched requirement to a `fact_id`
+- [x] Evidence citations linking each matched requirement to a `fact_id`
 - [ ] Progressive rank run emitting SSE progress ("ranked 240 of 412")
 - [ ] Rank failure falls back to recency order with an explicit flag
 

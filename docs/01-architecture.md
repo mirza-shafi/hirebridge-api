@@ -207,3 +207,32 @@ The first bottleneck will be worker concurrency against provider rate limits, no
 Scale workers horizontally; they are stateless. Split queues (`parse`, `generate`, `interview`)
 so a queue of 400 CV parses cannot starve a live interview session — this is the one piece of
 future-proofing worth doing in Phase 1, because retrofitting queue separation is invasive.
+
+
+## 12. Where pure logic lives
+
+An agent class needs a database session and the run store, so importing it pulls in
+SQLAlchemy, Redis and a populated environment. The transformations *around* it — schema to
+column mapping, score to prompt text, diff computation, validators — need none of that, and
+they are where the bugs actually are.
+
+So: **anything that only transforms data lives in its own module, never inside the class
+that needs a session.**
+
+| Pure module | Agent module |
+|---|---|
+| `jd_parser/mapping.py` | `jd_parser/agent.py` |
+| `resume_parser/mapping.py` | `resume_parser/agent.py` |
+| `cv_tailor/source_facts.py` | `cv_tailor/agent.py` |
+| `ranker/rendering.py` | `ranker/agent.py` |
+| `validators/fabrication.py`, `services/ranking.py`, `services/resume_diff.py` | — |
+
+The payoff is concrete: the release-gate suites and every mapping test run with nothing but
+`pydantic`, `httpx` and `pytest` installed — no database, no Redis, no environment. A gate
+that is hard to run is a gate that gets skipped.
+
+Corollaries:
+- Plain enums go in `app/schemas/enums.py`, which imports nothing from the framework.
+- Agent exceptions go in `app/agents/errors.py` for the same reason.
+- A test that genuinely needs a model class (`tests/test_models.py`) lives outside
+  `tests/agents/`.
