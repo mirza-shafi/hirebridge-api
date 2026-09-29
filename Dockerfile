@@ -7,7 +7,9 @@ RUN apt-get update \
         libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b libffi8 fonts-dejavu-core curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# uv from PyPI rather than a ghcr.io image: the build already depends on PyPI, and one
+# registry is one thing that can be blocked or rate-limited instead of two.
+RUN pip install --no-cache-dir uv
 
 # The virtualenv lives OUTSIDE the project directory on purpose: the compose stack
 # bind-mounts the source over /srv for hot reload, which would shadow a .venv created here
